@@ -1,4 +1,6 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
+const regEx = require('../utils/constants');
+const validator = require('validator');
 
 const movieSchema = new mongoose.Schema({
   country: {
@@ -25,7 +27,7 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (v) => /^https?:\/\/(www\.)?[\w-]+\.[\w./():,-]+#?$/.test(v),
+      validator: (link) => link.match(regEx),
       message: 'Некорректный URL-адрес изображения',
     },
   },
@@ -33,7 +35,7 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (v) => /^https?:\/\/(www\.)?[\w-]+\.[\w./():,-]+#?$/.test(v),
+      validator: (link) => link.match(regEx),
       message: 'Некорректный URL-адрес трейлера',
     },
   },
@@ -41,7 +43,7 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (v) => /^https?:\/\/(www\.)?[\w-]+\.[\w./():,-]+#?$/.test(v),
+      validator: (link) => link.match(regEx),
       message: 'Некорректный URL-адрес миниатюры изображения',
     },
   },
@@ -64,6 +66,4 @@ const movieSchema = new mongoose.Schema({
   },
 });
 
-const Movie = mongoose.model('Movie', movieSchema);
-
-export default Movie;
+module.exports = mongoose.model('movie', movieSchema);

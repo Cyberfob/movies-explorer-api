@@ -1,4 +1,7 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const validator = require('validator');
+const AuthError = require('../err/AuthError');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -6,7 +9,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
-    match: [/^\S+@\S+\.\S+$/, 'Введите корректный адрес электронной почты'],
+    validate: {
+      validator: (v) => validator.isEmail(v),
+      message: () => 'Поле Почта должно быть Email',
+    }
   },
   password: {
     type: String,
@@ -22,6 +28,23 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const User = mongoose.model('User', userSchema);
+userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        throw new AuthError('Неправильная почта или пароль');
+      }
 
-export default User;
+      return bcrypt.compare(password, user.password)
+        .then((result) => {
+          if (!result) {
+            throw new AuthError('Неправильная почта или пароль');
+          }
+          const userData = user.toObject();
+          delete userData.password;
+          return userData;
+        });
+    });
+};
+
+module.exports = mongoose.model('user', userSchema);

@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     validate: {
       validator: (v) => validator.isEmail(v),
       message: () => 'Поле Почта должно быть Email',
-    }
+    },
   },
   password: {
     type: String,

@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
-const User = require('../models/user');
 const jwt = require('jsonwebtoken');
+const User = require('../models/user');
 
 const NotFoundError = require('../err/NotFoundError');
 const BadRequestError = require('../err/BadRequestError');
@@ -28,7 +28,7 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => {
       const userData = { ...user._doc };
       delete userData.password;
-      res.status(201).send({data: userData});
+      res.status(201).send({ data: userData });
     })
     .catch((err) => {
       if (err.code === 11000) {
@@ -63,8 +63,7 @@ module.exports.updateUserInfo = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Ошибка в теле запроса'));
-      } 
+      }
       next(err);
     });
 };
-

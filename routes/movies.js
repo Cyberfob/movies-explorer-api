@@ -3,10 +3,10 @@ const { celebrateCreateMovie, celebrateDeleteMovie } = require('../validators/va
 
 const { getMovies, createMovie, deleteMovie } = require('../controllers/movies');
 
-  movies.get('/', getMovies);
+movies.get('/', getMovies);
 
-  movies.post('/', celebrateCreateMovie, createMovie);
+movies.post('/', celebrateCreateMovie, createMovie);
 
-  movies.post('/_id', celebrateDeleteMovie, deleteMovie);
+movies.post('/_id', celebrateDeleteMovie, deleteMovie);
 
-  module.exports = movies;
+module.exports = movies;

@@ -55,7 +55,11 @@ module.exports.login = (req, res, next) => {
 module.exports.updateUserInfo = (req, res, next) => {
   const { name, email } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { name, email }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, email },
+    { new: true, runValidators: true, upsert: false },
+  )
     .orFail(() => {
       throw new NotFoundError('Пользователь не найден');
     })
@@ -63,6 +67,11 @@ module.exports.updateUserInfo = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Ошибка в теле запроса'));
+        return;
+      }
+      if (err.code === 11000) {
+        next(new ConflictError('Ошибка при редактировании данных пользователя'));
+        return;
       }
       next(err);
     });

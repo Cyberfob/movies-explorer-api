@@ -4,7 +4,7 @@ const NotFoundError = require('../err/NotFoundError');
 const ForbiddenError = require('../err/ForbiddenError');
 
 module.exports.getMovies = (req, res, next) => {
-  Movie.find().sort({ createdAt: -1 })
+  Movie.find({ owner: req.user._id })
     .then((movieData) => res.send({ data: movieData }))
     .catch(next);
 };
@@ -43,14 +43,15 @@ module.exports.createMovie = (req, res, next) => {
 };
 
 module.exports.deleteMovie = (req, res, next) => {
-  const { movieId } = req.params;
+  const movieId = req.params._id;
+  const userID = req.user._id;
   Movie.findById(movieId)
     .orFail(new NotFoundError('Фильм не найден'))
     .then((movie) => {
-      if (movie.owner.toString() !== req.user._id.toString()) {
-        return next(new ForbiddenError('Вы не можете удалять чужие фильмы'));
+      if (movie.owner.toString() !== userID) {
+        next(new ForbiddenError('Вы не можете удалять чужие фильмы'));
       }
-      return movie.remove()
+      movie.remove()
         .then(() => res.send({ message: 'Фильм удалён' }))
         .catch((err) => next(err));
     })

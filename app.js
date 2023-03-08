@@ -5,6 +5,8 @@ const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
+const ratelimiter = require('./utils/rateLimiter');
 const users = require('./routes/users');
 const movies = require('./routes/movies');
 const { createUser, login } = require('./controllers/users');
@@ -12,6 +14,8 @@ const auth = require('./middlewares/auth');
 const NotFoundError = require('./err/NotFoundError');
 const { celebrateAuth, celebrateRegister } = require('./validators/validator');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { errorParser } = require('./err/ErrorParser');
+const { dbUrlDev } = require('./utils/constants');
 
 mongoose.set('strictQuery', true);
 
@@ -21,12 +25,14 @@ const config = dotenv.config({
   path: NODE_ENV === 'production' ? '.env' : '.env.common',
 }).parsed;
 
-// Настройка порта
-const { PORT = 3000 } = process.env;
+// Данные БД
+const PORT = process.env.PORT || 3000;
+
+const dbUrl = process.env.DATABASE_URL || dbUrlDev;
 
 const app = express();
 
-mongoose.connect('mongodb://127.0.0.1:27017/bitfilmsdb', {
+mongoose.connect(dbUrl, {
   autoIndex: true,
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -52,6 +58,10 @@ app.use(bodyParser.json());
 
 app.use(requestLogger);
 
+app.use(ratelimiter);
+
+app.use(helmet());
+
 // Роуты без авторизации
 app.post('/signin', celebrateAuth, login);
 app.post('/signup', celebrateRegister, createUser);
@@ -75,20 +85,6 @@ app.use(errorLogger);
 
 app.use(errors());
 
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
+app.use(errorParser);
 
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-});
-
-app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log('server start on 3000 PORT');
-});
+app.listen(PORT);

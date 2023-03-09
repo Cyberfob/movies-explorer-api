@@ -26,7 +26,7 @@ const config = dotenv.config({
 }).parsed;
 
 // Данные БД
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 const dbUrl = process.env.DATABASE_URL || dbUrlDev;
 

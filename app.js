@@ -43,7 +43,7 @@ const allowedCors = [
   'https://api.apetruhin.nomoredomains.work',
   'http://apetruhin.nomoredomains.work',
   'https://apetruhin.nomoredomains.work',
-  'http://localhost:3000',
+  'http://localhost:3001',
 ];
 
 app.set('config', config);
@@ -52,7 +52,7 @@ app.use(cors({
   origin: allowedCors,
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-
+app.get('/');
 // мидлвар : Json
 app.use(bodyParser.json());
 
@@ -63,6 +63,7 @@ app.use(ratelimiter);
 app.use(helmet());
 
 // Роуты без авторизации
+
 app.post('/signin', celebrateAuth, login);
 app.post('/signup', celebrateRegister, createUser);
 
